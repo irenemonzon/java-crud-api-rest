@@ -1,20 +1,38 @@
-FROM eclipse-temurin:21-jdk as build
+# ---- Build Stage ----
+FROM eclipse-temurin:21-jdk AS build
 
-COPY . /app
 WORKDIR /app
 
-RUN chmod +x mvnw
-RUN ./mvnw package -DskipTests
-RUN mv -f target/*.jar app.jar
+# Copy project files
+COPY . .
 
+# Make Maven wrapper executable
+RUN chmod +x mvnw
+
+# Build the project
+RUN ./mvnw clean package -DskipTests
+
+# Rename jar file
+RUN mv target/*.jar app.jar
+
+# ---- Run Stage ----
 FROM eclipse-temurin:21-jre
 
-ARG PORT
-ENV PORT=${PORT}
+WORKDIR /app
 
+# Copy jar from build stage
 COPY --from=build /app/app.jar .
 
+# Environment variables
+ARG PORT=8080
+ENV PORT=${PORT}
+
+# Create non-root user
 RUN useradd runtime
 USER runtime
 
-ENTRYPOINT [ "java", "-Dserver.port=${PORT}", "-jar", "app.jar" ]
+# Expose port 
+EXPOSE 8080
+
+# Run the app
+ENTRYPOINT sh -c "java -Dserver.port=${PORT} -jar app.jar"
