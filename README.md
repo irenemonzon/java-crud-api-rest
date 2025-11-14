@@ -53,8 +53,7 @@ apirest/
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd apirest
+   git clone git@github.com:irenemonzon/java-crud-api-rest.git
    ```
 
 2. **Configure environment variables**
